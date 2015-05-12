@@ -33,26 +33,29 @@
 ;;; Функции
 ;;;
 
-(defun genempty ()
+(defun gen-empty ()
   ;; Генерация пустого массива
   (make-array +num-of-elt+ :initial-element 0))
 
-(defun fillarray (id
+(defun fill-array (id
 		  begin
  		  length)
   ;; Заполнение массива
   (loop for i from begin to (+ begin length -1) do (setf (elt *timeline* i) id)))
 
-(defun checkfill (begin
+(defun check-fill (begin
 		  length)
   ;; Проверка последовательности на непрерывность
-  (let ((recycle 0)
-	(leng (+ begin length -1)))
-    (when (> leng +num-of-elt+)
-      (setf recycle (- +num-of-elt+ leng))
-      (setf leng (- leng recycle)))
-    
-    
-    
-    
-  
+  (format t "~a - ~a" begin length)
+  (loop for i from begin to (+ begin length -1) do (unless (= (elt *timeline* i) 0)
+						     (return-from check-fill 0)))
+  (return-from check-fill 1))
+
+(defun check-overload (begin
+		       length)
+  ;; Проверка переполнения
+  (if (> +num-of-elt+ (+ begin length -1))
+      (check-fill begin length)
+      (let* ((tail (- (+ begin length) +num-of-elt+))
+	     (head (- length tail)))
+	(and (check-fill begin head) (check-fill 0 tail)))))
