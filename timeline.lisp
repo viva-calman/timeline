@@ -13,7 +13,7 @@
 ;;;
 ;;; Константы
 ;;;
-(defconstant +num-of-elt+ (* 12 24 7))
+(defconstant +num-of-elt+ (- (* 12 24 7) 1))
 
 ;;;
 ;;; Классы
@@ -48,14 +48,58 @@
   ;; Проверка последовательности на непрерывность
   (format t "~a - ~a" begin length)
   (loop for i from begin to (+ begin length -1) do (unless (= (elt *timeline* i) 0)
-						     (return-from check-fill 0)))
+						     (return-from check-fill nil)))
   (return-from check-fill 1))
 
 (defun check-overload (begin
 		       length)
   ;; Проверка переполнения
-  (if (> +num-of-elt+ (+ begin length -1))
-      (check-fill begin length)
-      (let* ((tail (- (+ begin length) +num-of-elt+))
-	     (head (- length tail)))
-	(and (check-fill begin head) (check-fill 0 tail)))))
+  (let ((head)
+	(tail)
+	(inter (+ begin length -1)))
+    (if (< +num-of-elt+ inter)
+	(progn
+	  (format t "overload~%")
+	  (setf tail (- inter +num-of-elt+))
+	  (setf head (- length tail)))
+	(setf head length))    
+    (return-from check-overload (list begin head tail))))
+		     
+
+(defun operate-array (id
+		      begin
+		      length)
+  ;; Обработка запроса на заполнение
+  (let ((diap (check-overload begin length)))
+    (if (or (not (third diap)) (= (third diap) 0))
+	(if (check-fill begin
+			length)
+	    (fill-array id
+			begin
+			length)
+	    (show-message "Интервалы перекрываются"))
+	(if (and (check-fill (first diap)
+			     (second diap))
+		 (check-fill 0
+			     (third diap)))
+    	    (progn
+	      (format t "!")
+	      (fill-array id
+			  (first diap)
+			  (second diap))
+	      (fill-array id
+			  0
+			  (third diap)))
+	    (show-message "Интервалы перекрываются")))))
+	
+	
+
+
+
+;;;
+;;; Служебные функции
+;;;
+
+(defun show-message (mess)
+  ;; Отображение сообщения
+  (format t "~a~%" mess))
