@@ -103,3 +103,17 @@
 (defun show-message (mess)
   ;; Отображение сообщения
   (format t "~a~%" mess))
+
+(defun convert-interval (interval)
+  ;; Перевод номера интервала в читаемый вид
+  (let* ((hour 12)
+	 (day (* hour 24))
+	 (dw)
+	 (h)
+	 (m))
+    (setf dw (floor interval day))
+    (setf h (floor (- interval (* day dw)) hour))
+    (setf m (* (- interval (* day dw) (* hour h)) 5))
+    (format t "~a-~a-~a  " dw h m)))
+    
+	 
