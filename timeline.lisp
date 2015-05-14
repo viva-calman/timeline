@@ -114,6 +114,42 @@
     (setf dw (floor interval day))
     (setf h (floor (- interval (* day dw)) hour))
     (setf m (* (- interval (* day dw) (* hour h)) 5))
-    (format t "~a-~a-~a  " dw h m)))
+    (return-from convert-interval (list dw h m))))
+
+(defun parse-time (timelist)
+  ;; Красивый вывод таймстампа
+  (let ((out-dw)
+	(out-h)
+	(out-m))
+    (cond
+      ((= (first timelist) 0)
+       (setf out-dw "Пн."))
+      ((= (first timelist) 1)
+       (setf out-dw "Вт."))
+      ((= (first timelist) 2)
+       (setf out-dw "Ср."))
+      ((= (first timelist) 3)
+       (setf out-dw "Чт."))
+      ((= (first timelist) 4)
+       (setf out-dw "Пт."))
+      ((= (first timelist) 5)
+       (setf out-dw "Сб."))
+      ((= (first timelist) 6)
+       (setf out-dw "Вс."))
+      (t (setf out-dw "Свячельник")))
+    (if (< (second timelist) 10)
+	(setf out-h (concatenate 'string (write-to-string 0) (write-to-string (second timelist))))
+	(setf out-h (second timelist)))
+    (if (< (third timelist) 10)
+	(setf out-m (concatenate 'string (write-to-string 0) (write-to-string (third timelist))))
+	(setf out-m (third timelist)))
+    (return-from parse-time (list out-dw out-h out-m))))
+
+(defun nice-time (timelist)
+  ;; Отображение времени
+  (format t "~a,~3t~a:~a~%" (first timelist) (second timelist) (third timelist)))
+	  
+	  
+      
     
 	 
