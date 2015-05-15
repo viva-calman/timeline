@@ -46,10 +46,9 @@
 (defun check-fill (begin
 		  length)
   ;; Проверка последовательности на непрерывность
-  (format t "~a - ~a" begin length)
   (loop for i from begin to (+ begin length -1) do (unless (= (elt *timeline* i) 0)
 						     (return-from check-fill i)))
-  (return-from check-fill 1))
+  (return-from check-fill nil))
 
 (defun check-overload (begin
 		       length)
@@ -73,15 +72,21 @@
   (let ((diap (check-overload begin length)))
     (if (or (not (third diap)) (= (third diap) 0))
 	(if (not (check-fill begin
-			length))
+			     length))
 	    (fill-array id
 			begin
 			length)
-	    (show-message "Интервалы перекрываются"))
+	    (progn
+	      (show-message "Интервалы перекрываются")
+	      (show-message "Точка перекрытия:")
+	      (nice-time (parse-time
+			  (convert-interval
+			   (check-fill begin
+				       length))))))
 	(if (and (not (check-fill (first diap)
-			     (second diap)))
+				  (second diap)))
 		 (not (check-fill 0
-			     (third diap)))
+				  (third diap))))
     	    (progn
 	      (format t "!")
 	      (fill-array id
@@ -90,7 +95,15 @@
 	      (fill-array id
 			  0
 			  (third diap)))
-	    (show-message "Интервалы перекрываются")))))
+	    (progn
+	      (show-message "Интервалы перекрываются")
+	      (show-message "Точка перекрытия:")
+	      (nice-time (parse-time
+			  (convert-interval
+			   (or (check-fill (first diap)
+					   (second diap))
+			       (check-fill 0
+					   (third diap))))))))))))
 	
 	
 
