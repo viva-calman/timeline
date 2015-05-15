@@ -14,7 +14,7 @@
 ;;; Константы
 ;;;
 (defconstant +num-of-elt+ (- (* 12 24 7) 1))
-
+(defconstant +noe+ (* 12 24 7))
 ;;;
 ;;; Классы
 ;;;
@@ -35,7 +35,7 @@
 
 (defun gen-empty ()
   ;; Генерация пустого массива
-  (make-array +num-of-elt+ :initial-element 0))
+  (make-array +noe+ :initial-element 0))
 
 (defun fill-array (id
 		  begin
@@ -48,7 +48,7 @@
   ;; Проверка последовательности на непрерывность
   (format t "~a - ~a" begin length)
   (loop for i from begin to (+ begin length -1) do (unless (= (elt *timeline* i) 0)
-						     (return-from check-fill nil)))
+						     (return-from check-fill i)))
   (return-from check-fill 1))
 
 (defun check-overload (begin
@@ -72,15 +72,15 @@
   ;; Обработка запроса на заполнение
   (let ((diap (check-overload begin length)))
     (if (or (not (third diap)) (= (third diap) 0))
-	(if (check-fill begin
-			length)
+	(if (not (check-fill begin
+			length))
 	    (fill-array id
 			begin
 			length)
 	    (show-message "Интервалы перекрываются"))
-	(if (and (check-fill (first diap)
-			     (second diap))
-		 (check-fill 0
+	(if (and (not (check-fill (first diap)
+			     (second diap)))
+		 (not (check-fill 0
 			     (third diap)))
     	    (progn
 	      (format t "!")
@@ -148,7 +148,21 @@
 (defun nice-time (timelist)
   ;; Отображение времени
   (format t "~a,~3t~a:~a~%" (first timelist) (second timelist) (third timelist)))
-	  
+
+(defun read-input (prompt)
+  ;; Чтение пользовательского ввода
+  (format *query-io* "~a: " prompt)
+  (force-output *query-io*)
+  (read-line *query-io*))
+
+(defun timeinput ()
+  ;; Ввод времени
+  (show-message "Введите время начала отрезка, в формате ЧЧ:ММ
+Разделитель может быть любым, минуты округляются автоматически до ближайшего числа, кратного пяти")
+  (parse-timeinput (read-input ">"))
+  (show-message "Укажите дни недели, на которые применяется этот отрезок. Можно указать диапазон, через дефис или последовательно в любой форме и с любым разделителем, кроме дефиса")
+  (parce-dayofweek (read-input ">")))
+  
 	  
       
     
