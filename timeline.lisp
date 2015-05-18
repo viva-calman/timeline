@@ -58,7 +58,6 @@
 	(inter (+ begin length -1)))
     (if (< +num-of-elt+ inter)
 	(progn
-	  (format t "overload~%")
 	  (setf tail (- inter +num-of-elt+))
 	  (setf head (- length tail)))
 	(setf head length))    
@@ -88,7 +87,6 @@
 		 (not (check-fill 0
 				  (third diap))))
     	    (progn
-	      (format t "!")
 	      (fill-array id
 			  (first diap)
 			  (second diap))
@@ -175,7 +173,30 @@
   (parse-timeinput (read-input ">"))
   (show-message "Укажите дни недели, на которые применяется этот отрезок. Можно указать диапазон, через дефис или последовательно в любой форме и с любым разделителем, кроме дефиса")
   (parce-dayofweek (read-input ">")))
-  
+
+(defun parse-timeinput (timestring)
+  ;; Функция, разбирающая пользовательский ввод времени.
+  (let ((parsed-string (first (cl-ppcre:all-matches-as-strings "\\d{1,2}\\D+\\d{1,2}" timestring))))
+    (if (not (eq parsed-string nil))
+	(convert-time (cl-ppcre:all-matches-as-strings "\\d{1,2}" parsed-string))
+	(show-message "Неверный формат времени"))))
+
+(defun convert-time (timelist)
+  ;; Перевод времени в интервалы
+  (let ((hour (parse-integer (first timelist)))
+	(minute (parse-integer (second timelist)))
+	(inter))
+    (if (or (> hour 23) (> minute 59))
+	(show-message "Неверное значение времени"))
+    (setf inter (* hour 12))
+    (if (> (mod minute 5) 2)
+	(setf inter (+ inter (truncate minute 5) 1))
+	(setf inter (+ inter (truncate minute 5))))
+    (return-from convert-time inter)))
+	
+	     
+    
+	     
 	  
       
     
