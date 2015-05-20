@@ -193,6 +193,15 @@
 	(setf inter (+ inter (truncate minute 5) 1))
 	(setf inter (+ inter (truncate minute 5))))
     (return-from convert-time inter)))
+
+(defun parse-dayofweek (dow)
+  ;; Обработка введенного значения дня недели
+  (cond
+    ((cl-ppcre:all-matches-as-strings "[1-7]-[1-7]" dow)
+     (format t "diapazone"))
+    ((cl-ppcre:all-matches-as-strings "\\d" dow)
+     (format t "dayz"))))
+    
 	
 	     
     
