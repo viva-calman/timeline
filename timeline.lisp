@@ -196,11 +196,29 @@
 
 (defun parse-dayofweek (dow)
   ;; Обработка введенного значения дня недели
-  (cond
-    ((cl-ppcre:all-matches-as-strings "[1-7]-[1-7]" dow)
-     (format t "diapazone"))
-    ((cl-ppcre:all-matches-as-strings "\\d" dow)
-     (format t "dayz"))))
+  (let ((workdow (cl-ppcre:regex-replace-all "\\D|[890]" dow "")))
+    (cond
+      ((cl-ppcre:all-matches-as-strings "[1-7]-[1-7]" dow)
+       (return-from parse-dayofweek (list 1
+					  (cl-ppcre:all-matches-as-strings "[1-7]-[1-7]" dow))))
+      ((cl-ppcre:all-matches-as-strings "\\d{1,7}" workdow)
+       (return-from parse-dayofweek (list 2
+					  (delete-duplicate (cl-ppcre:all-matches-as-strings "\\d" workdow )))))
+      (t (return-from parse-dayofweek (list 2 (list 1 2 3 4 5 6 7)))))))
+    
+
+
+(defun delete-duplicate (worklist)
+  ;; Удаление повторяющихся элементов из списка
+  (let ((retlist))
+    (loop for (x . y) on worklist do (cond
+				       ((member x retlist :test 'equal)
+					(continue))
+				       (t (push x retlist))))
+    (return-from delete-duplicate retlist)))
+  
+
+					
     
 	
 	     
