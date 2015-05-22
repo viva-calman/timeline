@@ -168,11 +168,28 @@
 
 (defun timeinput ()
   ;; Ввод времени
-  (show-message "Введите время начала отрезка, в формате ЧЧ:ММ
+  (let ((output))
+    (show-message "Введите время начала отрезка, в формате ЧЧ:ММ
 Разделитель может быть любым, минуты округляются автоматически до ближайшего числа, кратного пяти")
-  (parse-timeinput (read-input ">"))
-  (show-message "Укажите дни недели, на которые применяется этот отрезок. Можно указать диапазон, через дефис или последовательно в любой форме и с любым разделителем, кроме дефиса")
-  (parce-dayofweek (read-input ">")))
+    (setf output (parse-timeinput (read-input ">")))
+    (show-message "Укажите дни недели, на которые применяется этот отрезок. Можно указать диапазон, через дефис или последовательно в любой форме и с любым разделителем, кроме дефиса")
+    (parce-dayofweek (read-input ">"))))
+
+(defun gen-interval-list (days
+			  hours)
+  ;; Объединение времени ввода и дней недели
+  (let ((intlist (gen-day-interval (loop for i in (second days)
+				      collect (parse-integer i)))))
+    (cond
+      ((= (first days) 1)
+       (loop for i in intlist
+	  collect (+ i hours))))))
+
+(defun gen-day-interval (intlist)
+  ;; День в интервалы
+  (loop for i in intlist collect (* (- i 1) (* 12 24)))) 
+	  
+			      
 
 (defun parse-timeinput (timestring)
   ;; Функция, разбирающая пользовательский ввод времени.
@@ -200,7 +217,8 @@
     (cond
       ((cl-ppcre:all-matches-as-strings "[1-7]-[1-7]" dow)
        (return-from parse-dayofweek (list 1
-					  (cl-ppcre:all-matches-as-strings "[1-7]-[1-7]" dow))))
+					  (cl-ppcre:all-matches-as-strings "\\d"
+									   (first (cl-ppcre:all-matches-as-strings "[1-7]-[1-7]" dow))))))
       ((cl-ppcre:all-matches-as-strings "\\d{1,7}" workdow)
        (return-from parse-dayofweek (list 2
 					  (delete-duplicate (cl-ppcre:all-matches-as-strings "\\d" workdow )))))
