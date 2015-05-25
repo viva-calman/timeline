@@ -62,7 +62,13 @@
 	  (setf head (- length tail)))
 	(setf head length))    
     (return-from check-overload (list begin head tail))))
-		     
+
+(defun input-operate (id
+		      beginlist
+		      length)
+  ;; Внесение введенных данных в массив
+  (loop for i in beginlist do (operate-array id i length)))
+  
 
 (defun operate-array (id
 		      begin
@@ -171,19 +177,29 @@
   (let ((output))
     (show-message "Введите время начала отрезка, в формате ЧЧ:ММ
 Разделитель может быть любым, минуты округляются автоматически до ближайшего числа, кратного пяти")
-    (setf output (parse-timeinput (read-input ">")))
+    (push (parse-timeinput (read-input ">")) output)
+    (show-message "Введите время окончания отрезка" )
+    (push (do
+	   ((out (parse-timeinput (read-input ">")) (parse-timeinput (read-input ">"))))
+	   ((< (first output) out) out)) output)
     (show-message "Укажите дни недели, на которые применяется этот отрезок. Можно указать диапазон, через дефис или последовательно в любой форме и с любым разделителем, кроме дефиса")
-    (parce-dayofweek (read-input ">"))))
+    (push (parse-dayofweek (read-input ">")) output)
+    (return-from timeinput output)))
 
 (defun gen-interval-list (days
 			  hours)
   ;; Объединение времени ввода и дней недели
   (let ((intlist (gen-day-interval (loop for i in (second days)
-				      collect (parse-integer i)))))
+				      collect (parse-integer i))))
+	(intlist2 (loop for i in (second days)
+		      collect (parse-integer i))))
     (cond
       ((= (first days) 1)
-       (loop for i in intlist
-	  collect (+ i hours))))))
+       (loop for i in intlist collect (+ i hours)))
+      ((= (first days) 2)
+       (loop for i in intlist2 collect (+ (* (- i 1) (* 12 24)) hours))))))
+    
+
 
 (defun gen-day-interval (intlist)
   ;; День в интервалы
@@ -213,16 +229,16 @@
 
 (defun parse-dayofweek (dow)
   ;; Обработка введенного значения дня недели
-  (let ((workdow (cl-ppcre:regex-replace-all "\\D|[890]" dow "")))
+  (let ((workdow (cl-ppcre:regex-replace-all "\\D|[890]" dow ""))
+	(diap (cl-ppcre:all-matches-as-strings "\\d"(first (cl-ppcre:all-matches-as-strings "[1-7]-[1-7]" dow)))))
     (cond
       ((cl-ppcre:all-matches-as-strings "[1-7]-[1-7]" dow)
-       (return-from parse-dayofweek (list 1
-					  (cl-ppcre:all-matches-as-strings "\\d"
-									   (first (cl-ppcre:all-matches-as-strings "[1-7]-[1-7]" dow))))))
+       (return-from parse-dayofweek (loop  for i from (parse-integer (first diap))
+				       to (parse-integer (second diap))
+				       collect (write-to-string i))))
       ((cl-ppcre:all-matches-as-strings "\\d{1,7}" workdow)
-       (return-from parse-dayofweek (list 2
-					  (delete-duplicate (cl-ppcre:all-matches-as-strings "\\d" workdow )))))
-      (t (return-from parse-dayofweek (list 2 (list 1 2 3 4 5 6 7)))))))
+       (return-from parse-dayofweek (delete-duplicate (cl-ppcre:all-matches-as-strings "\\d" workdow ))))
+      (t (return-from parse-dayofweek (list "1" "2" "3" "4" "5" "6" "7"))))))
     
 
 
