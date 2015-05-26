@@ -67,7 +67,7 @@
 		      beginlist
 		      length)
   ;; Внесение введенных данных в массив
-  (loop for i in beginlist do (operate-array id i length)))
+  (loop for i in beginlist do (operate-array id (day-interval i) length)))
   
 
 (defun operate-array (id
@@ -189,17 +189,13 @@
 (defun gen-interval-list (days
 			  hours)
   ;; Объединение времени ввода и дней недели
-  (let ((intlist (gen-day-interval (loop for i in (second days)
-				      collect (parse-integer i))))
-	(intlist2 (loop for i in (second days)
-		      collect (parse-integer i))))
-    (cond
-      ((= (first days) 1)
-       (loop for i in intlist collect (+ i hours)))
-      ((= (first days) 2)
-       (loop for i in intlist2 collect (+ (* (- i 1) (* 12 24)) hours))))))
+  (let ((intlist (gen-day-interval (loop for i in days
+				      collect (parse-integer i)))))
+    (loop for i in intlist collect (+ i hours))))
     
-
+(defun interval-input (inter)
+  ;; Служебная функция, обертка для ввода
+  (return-from interval-input (list (gen-interval-list (first inter) (third inter)) (second inter))))
 
 (defun gen-day-interval (intlist)
   ;; День в интервалы
