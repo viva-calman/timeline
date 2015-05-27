@@ -64,10 +64,9 @@
     (return-from check-overload (list begin head tail))))
 
 (defun input-operate (id
-		      beginlist
-		      length)
+		      beginlist)
   ;; Внесение введенных данных в массив
-  (loop for i in beginlist do (operate-array id (day-interval i) length)))
+  (loop for i in (first beginlist) do (operate-array id i (second beginlist))))
   
 
 (defun operate-array (id
@@ -133,6 +132,15 @@
     (setf m (* (- interval (* day dw) (* hour h)) 5))
     (return-from convert-interval (list dw h m))))
 
+(defun task-list (timeline)
+  ;; Вывод всех имеющихся задач
+  (let ((curr-int 0))
+    (loop for i from 0 to 2015 do (unless (= (elt timeline i) curr-int)
+				    (nice-time (parse-time (convert-interval i)) (elt timeline i))
+				    (setf curr-int (elt timeline i))))))
+	     
+  
+
 (defun parse-time (timelist)
   ;; Красивый вывод таймстампа
   (let ((out-dw)
@@ -162,9 +170,13 @@
 	(setf out-m (third timelist)))
     (return-from parse-time (list out-dw out-h out-m))))
 
-(defun nice-time (timelist)
+(defun nice-time (timelist id)
   ;; Отображение времени
-  (format t "~a,~3t~a:~a~%" (first timelist) (second timelist) (third timelist)))
+  (format t "~a,~3t~a:~a ~a~%" (first timelist) (second timelist) (third timelist) (extract-task id)))
+
+(defun extract-task (id)
+  ;; Заглушка. вывод задачи по id
+  (return-from extract-task id))
 
 (defun read-input (prompt)
   ;; Чтение пользовательского ввода
