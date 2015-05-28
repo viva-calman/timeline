@@ -134,11 +134,20 @@
 
 (defun task-list (timeline)
   ;; Вывод всех имеющихся задач
-  (let ((curr-int 0))
-    (loop for i from 0 to 2015 do (unless (= (elt timeline i) curr-int)
-				    (nice-time (parse-time (convert-interval i)) (elt timeline i))
-				    (setf curr-int (elt timeline i))))))
-	     
+  (let ((curr-int 0)
+	(first-int 0)
+	(flag (elt timeline 0)))
+    (loop for i from 0 to 2015 do (let ((cur-elt (elt timeline i)))
+				    (unless (= flag cur-elt)
+				      (nice-time
+				       (parse-time (convert-interval first-int))
+				       (parse-time (convert-interval i))
+				       (elt timeline cur-int))
+				      (setf first-int i)
+				      (setf flag cur-elt)
+				      (setf curr-int cur-elt)))))
+
+     
   
 
 (defun parse-time (timelist)
@@ -170,12 +179,22 @@
 	(setf out-m (third timelist)))
     (return-from parse-time (list out-dw out-h out-m))))
 
-(defun nice-time (timelist id)
+(defun nice-time (timelist-b
+		  timelist-e
+		  id)
   ;; Отображение времени
-  (format t "~a,~3t~a:~a ~a~%" (first timelist) (second timelist) (third timelist) (extract-task id)))
+  (format t "~a,~3t~a:~a-~a,~3t~a:~a ~a~%" (first timelist-b)
+	  (second timelist-b)
+	  (third timelist-b)
+	  (first timelist-e)
+	  (second timelist-e)
+	  (third timelist-e)
+	  (extract-task id)))
 
 (defun extract-task (id)
   ;; Заглушка. вывод задачи по id
+  (if (= id 0)
+      (setf id "Свободное время"))
   (return-from extract-task id))
 
 (defun read-input (prompt)
