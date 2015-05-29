@@ -132,23 +132,36 @@
     (setf m (* (- interval (* day dw) (* hour h)) 5))
     (return-from convert-interval (list dw h m))))
 
-(defun task-list (timeline)
+(defun task-list (timeline &optional (id -1 id-supplied-p))
   ;; Вывод всех имеющихся задач
-  (let ((curr-int 0)
-	(first-int 0)
+  (let ((intervals (list (list 0 (elt timeline 0))))
 	(flag (elt timeline 0)))
     (loop for i from 0 to 2015 do (let ((cur-elt (elt timeline i)))
 				    (unless (= flag cur-elt)
-				      (nice-time
-				       (parse-time (convert-interval first-int))
-				       (parse-time (convert-interval i))
-				       (elt timeline cur-int))
-				      (setf first-int i)
-				      (setf flag cur-elt)
-				      (setf curr-int cur-elt)))))
+				      (push i (first intervals))
+				      (push (list i cur-elt) intervals)
+				      (setf flag cur-elt))))
+    (push 2015 (first intervals))
+    (loop for i in (reverse intervals) do (cond
+					    ((and (= id -1) (not id-supplied-p))
+					     (nice-time
+					      (parse-time (convert-interval (second i)))
+					      (parse-time (convert-interval (first i)))
+					      (third i)))
+					    ((= id (third i))
+					     (nice-time
+					      (parse-time (convert-interval (second i)))
+					      (parse-time (convert-interval (first i)))
+					      (third i)))))))
 
-     
+					     
+					   
   
+
+				
+					
+
+ 
 
 (defun parse-time (timelist)
   ;; Красивый вывод таймстампа
@@ -183,7 +196,7 @@
 		  timelist-e
 		  id)
   ;; Отображение времени
-  (format t "~a,~3t~a:~a-~a,~3t~a:~a ~a~%" (first timelist-b)
+  (format t "~a,~3t~a:~a - ~a,~3t~a:~a   ~a~%" (first timelist-b)
 	  (second timelist-b)
 	  (third timelist-b)
 	  (first timelist-e)
