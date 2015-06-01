@@ -18,14 +18,40 @@
 ;;;
 ;;; Классы
 ;;;
-;(defclass timeslice ()
-;  ;; Класс, реализующий единичную последовательность
-;  ((id :initarg :id
-;       :accessor id
-;       :initform *current-id*
-;       :documentation "id of timeslice")
+(defclass timeslice ()
+  ;; Класс, реализующий единичную последовательность
+  ((id :initarg :id
+       :accessor id
+       :initform *current-id*
+       :documentation "id of timeslice")
+   (title :initarg :title
+	  :accessor title
+	  :initform (error "Not empty!")
+	  :documentation "Title of timeslice")))
+
+(defclass timeline ()
+  ;; класс, реализующий таймлайн
+  ((timeline :initarg :timeline
+	     :accessor timeline
+	     :initform (error "Not empty!")
+	     :documentation "Timeline array")
+   (timeslices :initarg :timeslices
+	       :accessor timeslices
+	       :initform (error "Not Empty")
+	       :documentation "Array of timeslices")
+   (current-id :initarg :current-id
+	       :accessor current-id
+	       :initform (error "No Empty")
+	       :documentation "Current id of timeslice")))
+
+;;;
+;;; Обобщенные функции
+;;;
 
 
+;;;
+;;; Методы
+;;;
 
 
 
