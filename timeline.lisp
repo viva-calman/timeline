@@ -47,6 +47,32 @@
 ;;;
 ;;; Обобщенные функции
 ;;;
+(defgeneric serialize-slice (timeslice)
+  (:documentation "Сериализация слайса"))
+
+(defgeneric serialize-line (timeline)
+  (:documentation "Сериализация таймлайна"))
+
+(defgeneric deserialize-slice (timeslice)
+  (:documentation "Десериализация слайса"))
+
+(defgeneric deserialize-line (timeline)
+  (:documentation "Десериализация таймлайна"))
+
+(defgeneric write-tline (timeline)
+  (:documentation "Сохранение таймлайна"))
+
+(defgeneric read-tline (timeline)
+  (:documentation "Загрузка таймлайна"))
+
+(defgeneric clear-line (timeline)
+  (:documentation "Удаление несуществующих записей"))
+
+(defgeneric edit-line (timeline)
+  (:documentation "Редактирование таймлайна"))
+
+(defgeneric view-line (timeline)
+  (:documentation "Вывод таймлайна"))
 
 
 ;;;
