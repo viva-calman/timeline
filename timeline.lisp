@@ -90,8 +90,8 @@
   (make-array +noe+ :initial-element 0))
 
 (defun fill-array (id
-		  begin
- 		  length)
+		   begin
+		   length)
   ;; Заполнение массива
   (loop for i from begin to (+ begin length -1) do (setf (elt *timeline* i) id)))
 
@@ -120,15 +120,16 @@
   ;; Внесение введенных данных в массив
   (loop for i in (first beginlist) do (operate-array id i (second beginlist))))
   
-
 (defun operate-array (id
 		      begin
-		      length)
+		      length
+		      &optional (edit t edit-supplied-p))
   ;; Обработка запроса на заполнение
   (let ((diap (check-overload begin length)))
     (if (or (not (third diap)) (= (third diap) 0))
-	(if (not (check-fill begin
-			     length))
+	(if (or edit-supplied-p (not (check-fill begin
+						 length)))
+	       
 	    (fill-array id
 			begin
 			length)
@@ -139,10 +140,10 @@
 			  (convert-interval
 			   (check-fill begin
 				       length))))))
-	(if (and (not (check-fill (first diap)
-				  (second diap)))
-		 (not (check-fill 0
-				  (third diap))))
+	(if (or edit-supplied-p (and (not (check-fill (first diap)
+						      (second diap)))
+				    (not (check-fill 0
+						     (third diap)))))
     	    (progn
 	      (fill-array id
 			  (first diap)
@@ -244,18 +245,22 @@
 	(setf out-m (third timelist)))
     (return-from parse-time (list out-dw out-h out-m))))
 
-(defun nice-time (timelist-b
-		  timelist-e
-		  id)
+(defun nice-time (timelist-b &optional
+			       timelist-e
+			       (id 0 id-supplied-p))
   ;; Отображение времени
-  (format t "~a,~3t~a:~a - ~a,~3t~a:~a   ~a~%" (first timelist-b)
+  (if id-supplied-p
+      (format t "~a,~3t~a:~a - ~a,~3t~a:~a   ~a~%" (first timelist-b)
 	  (second timelist-b)
 	  (third timelist-b)
 	  (first timelist-e)
 	  (second timelist-e)
 	  (third timelist-e)
-	  (extract-task id)))
-
+	  (extract-task id))
+    (format t "~a,~3t~a:~a" (first timelist-b)
+	  (second timelist-b)
+	  (third timelist-b))))
+	  
 (defun extract-task (id)
   ;; Заглушка. вывод задачи по id
   (if (= id 0)
