@@ -69,7 +69,9 @@
 		   (timeslices timeslices)
 		   (current-id current-id)) timeline
     (show-message "Заголовок")
-    (push (list current-id (read-input ">")) timeslices)))
+    (push (list current-id (read-input ">")) timeslices)
+    (input-operate current-id (interval-input (timeinput)) timeline)))
+  
       
 
 
@@ -221,15 +223,6 @@
 					      (parse-time (convert-interval (second i)))
 					      (parse-time (convert-interval (first i)))
 					      (third i)))))))
-
-					     
-					   
-  
-
-				
-					
-
- 
 
 (defun parse-time (timelist)
   ;; Красивый вывод таймстампа
