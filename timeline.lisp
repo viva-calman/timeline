@@ -7,7 +7,7 @@
 ;;;
 ;;; Глобальные переменные
 ;;;
-(defparameter *current-timeline*)
+(defvar *current-timeline*)
 (defvar *current-id* 0)
 
 ;;;
@@ -18,43 +18,26 @@
 ;;;
 ;;; Классы
 ;;;
-(defclass timeslice ()
-  ;; Класс, реализующий единичную последовательность
-  ((id :initarg :id
-       :accessor id
-       :initform *current-id*
-       :documentation "id of timeslice")
-   (title :initarg :title
-	  :accessor title
-	  :initform (error "Not empty!")
-	  :documentation "Title of timeslice")))
-
 (defclass timeline ()
   ;; класс, реализующий таймлайн
   ((timeline :initarg :timeline
 	     :accessor timeline
-	     :initform (error "Not empty!")
+	     :initform (gen-empty)
 	     :documentation "Timeline array")
    (timeslices :initarg :timeslices
 	       :accessor timeslices
-	       :initform (error "Not Empty")
+	       :initform (list (list 0 "Свободно"))
 	       :documentation "Array of timeslices")
    (current-id :initarg :current-id
 	       :accessor current-id
-	       :initform (error "No Empty")
+	       :initform 1
 	       :documentation "Current id of timeslice")))
 
 ;;;
 ;;; Обобщенные функции
 ;;;
-(defgeneric serialize-slice (timeslice)
-  (:documentation "Сериализация слайса"))
-
 (defgeneric serialize-line (timeline)
   (:documentation "Сериализация таймлайна"))
-
-(defgeneric deserialize-slice (timeslice)
-  (:documentation "Десериализация слайса"))
 
 (defgeneric deserialize-line (timeline)
   (:documentation "Десериализация таймлайна"))
@@ -74,17 +57,30 @@
 (defgeneric view-line (timeline)
   (:documentation "Вывод таймлайна"))
 
+(defgeneric add-line (timeline)
+  (:documentation "Добавление новой записи"))
 
 ;;;
 ;;; Методы
 ;;;
+(defmethod add-line ((timeline timeline))
+  ;; Добавление новой записи
+  (with-accessors ((timeline timeline)
+		   (timeslices timeslices)
+		   (current-id current-id)) timeline
+    (show-message "Заголовок")
+    (push (list current-id (read-input ">")) timeslices)))
+      
 
 
 
 ;;;
 ;;; Функции
 ;;;
-
+(defun init-timeline ()
+  ;; Инициализация нового таймлайна
+  (setf *current-timeline* (make-instance 'timeline)))
+  
 (defun gen-empty ()
   ;; Генерация пустого массива
   (make-array +noe+ :initial-element 0))
@@ -101,6 +97,12 @@
   (loop for i from begin to (+ begin length -1) do (unless (= (elt *timeline* i) 0)
 						     (return-from check-fill i)))
   (return-from check-fill nil))
+
+(defun delete-slice (timeline
+		     id)
+  ;; Обнуление полей с определенным id
+  (loop for i from 0 to 2015 do (if (= (elt timeline i) id)
+				    (setf (elt timeline i) 0))))
 
 (defun check-overload (begin
 		       length)
