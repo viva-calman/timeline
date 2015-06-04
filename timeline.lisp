@@ -87,14 +87,16 @@
 
 (defun fill-array (id
 		   begin
-		   length)
+		   length
+		   timeline)
   ;; Заполнение массива
-  (loop for i from begin to (+ begin length -1) do (setf (elt *timeline* i) id)))
+  (loop for i from begin to (+ begin length -1) do (setf (elt timeline i) id)))
 
 (defun check-fill (begin
-		  length)
+		   length
+		   timeline)
   ;; Проверка последовательности на непрерывность
-  (loop for i from begin to (+ begin length -1) do (unless (= (elt *timeline* i) 0)
+  (loop for i from begin to (+ begin length -1) do (unless (= (elt timeline i) 0)
 						     (return-from check-fill i)))
   (return-from check-fill nil))
 
@@ -118,50 +120,61 @@
     (return-from check-overload (list begin head tail))))
 
 (defun input-operate (id
-		      beginlist)
+		      beginlist
+		      timeline)
   ;; Внесение введенных данных в массив
-  (loop for i in (first beginlist) do (operate-array id i (second beginlist))))
+  (loop for i in (first beginlist) do (operate-array id i (second beginlist) timeline)))
   
 (defun operate-array (id
 		      begin
 		      length
+		      timeline
 		      &optional (edit t edit-supplied-p))
   ;; Обработка запроса на заполнение
   (let ((diap (check-overload begin length)))
     (if (or (not (third diap)) (= (third diap) 0))
 	(if (or edit-supplied-p (not (check-fill begin
-						 length)))
+						 length
+						 timeline)))
 	       
 	    (fill-array id
 			begin
-			length)
+			length
+			timeline)
 	    (progn
 	      (show-message "Интервалы перекрываются")
 	      (show-message "Точка перекрытия:")
 	      (nice-time (parse-time
 			  (convert-interval
 			   (check-fill begin
-				       length))))))
+				       length
+				       timeline))))))
 	(if (or edit-supplied-p (and (not (check-fill (first diap)
-						      (second diap)))
+						      (second diap)
+						      timeline))
 				    (not (check-fill 0
-						     (third diap)))))
+						     (third diap)
+						     timeline))))
     	    (progn
 	      (fill-array id
 			  (first diap)
-			  (second diap))
+			  (second diap)
+			  timeline)
 	      (fill-array id
 			  0
-			  (third diap)))
+			  (third diap)
+			  timeline))
 	    (progn
 	      (show-message "Интервалы перекрываются")
 	      (show-message "Точка перекрытия:")
 	      (nice-time (parse-time
 			  (convert-interval
 			   (or (check-fill (first diap)
-					   (second diap))
+					   (second diap)
+					   timeline)
 			       (check-fill 0
-					   (third diap))))))))))))
+					   (third diap)
+					   timeline)))))))))))
 	
 	
 
@@ -298,7 +311,7 @@
     
 (defun interval-input (inter)
   ;; Служебная функция, обертка для ввода
-  (return-from interval-input (list (gen-interval-list (first inter) (third inter)) (second inter))))
+  (return-from interval-input (list (gen-interval-list (first inter) (third inter)) (- (second inter) (third inter)))))
 
 (defun gen-day-interval (intlist)
   ;; День в интервалы
