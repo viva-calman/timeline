@@ -76,7 +76,8 @@
 		   (current-id current-id)) timeline
     (show-message "Заголовок")
     (push (list current-id (read-input ">")) timeslices)
-    (input-operate current-id (interval-input (timeinput)) timeline)))
+    (input-operate current-id (interval-input (timeinput)) timeline)
+    (incf current-id)))
   
 (defmethod extract-task ((timeline timeline)
 			 id)
