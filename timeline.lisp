@@ -54,11 +54,17 @@
 (defgeneric edit-line (timeline)
   (:documentation "Редактирование таймлайна"))
 
-(defgeneric view-line (timeline)
+(defgeneric view-line (timeline
+		       id)
   (:documentation "Вывод таймлайна"))
 
 (defgeneric add-line (timeline)
   (:documentation "Добавление новой записи"))
+
+(defgeneric extract-task (timeline
+			  id)
+  (:documentation "Получение заголовка задачи по id"))
+  
 
 ;;;
 ;;; Методы
@@ -72,8 +78,21 @@
     (push (list current-id (read-input ">")) timeslices)
     (input-operate current-id (interval-input (timeinput)) timeline)))
   
-      
+(defmethod extract-task ((timeline timeline)
+			 id)
+  ;; Извлечение записи из массива по id
+  (with-slots ((timeslices timeslices)) timeline
+    (second (first (remove-if-not #'(lambda (c) (= (first c) id)) timeslices))))) ;; Stupid
 
+(defmethod view-line ((timeline timeline)
+		      id)
+  ;; Отображение таймлайна
+  (with-slots ((timeline timeline)) timeline
+    (cond
+      ((= id -1)
+       (task-list timeline))
+      (t (task-list timeline id)))))
+	       
 
 
 ;;;
@@ -264,16 +283,16 @@
 	  (first timelist-e)
 	  (second timelist-e)
 	  (third timelist-e)
-	  (extract-task id))
+	  (extract-task *current-timeline* id))
     (format t "~a,~3t~a:~a" (first timelist-b)
 	  (second timelist-b)
 	  (third timelist-b))))
 	  
-(defun extract-task (id)
-  ;; Заглушка. вывод задачи по id
-  (if (= id 0)
-      (setf id "Свободное время"))
-  (return-from extract-task id))
+;(defun extract-task (id)
+;  ;; Заглушка. вывод задачи по id
+;  (if (= id 0)
+;      (setf id "Свободное время"))
+;  (return-from extract-task id))
 
 (defun read-input (prompt)
   ;; Чтение пользовательского ввода
