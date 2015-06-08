@@ -36,7 +36,7 @@
 ;;;
 ;;; Обобщенные функции
 ;;;
-(defgeneric serialize-line (timeline)
+(defgeneric deserialize-line (timeline)
   (:documentation "Сериализация таймлайна"))
 
 (defgeneric write-tline (timeline)
@@ -76,7 +76,7 @@
     (input-operate current-id (interval-input (timeinput)) timeline)
     (incf current-id)))
 
-(defmethod serialize-line ((timeline timeline))
+(defmethod deserialize-line ((timeline timeline))
   ;; Преобразование объекта в lisp-форму
   (with-slots ((timeline timeline)
 	       (timeslices timeslices)
@@ -108,13 +108,44 @@
   ;; Инициализация нового таймлайна
   (setf *current-timeline* (make-instance 'timeline)))
 
-(defun deserialize-line (arr)
+(defun serialize-line (arr)
   ;; Преобразование lisp-формы в объект
   (setf *current-timeline* (make-instance 'timeline
 					  :timeline (first arr)
 					  :timeslices (second arr)
 					  :current-id (third arr))))
 
+(defun save-timeline (timeline)
+  ;; Сохранение таймлайна
+  (with-open-file (out "tl.db"
+		       :direction :output
+		       :if-exists :supersede)
+    (with-standard-io-syntax
+	(print (deserialize-line timeline) out))))
+		       
+(defun load-timeline ()
+  ;; Загрузка таймлайна
+  (restart-case
+      (progn
+	(with-open-file (in "tl.db")
+	  (with-standard-io-syntax
+	    (serialize-line (read in))
+	    (show-message "Загрузка завершена"))))
+    (file-error () (if-not-exists))))
+
+(defun user-interfase ()
+  ;; Пользовательский интерфейс
+  (show-message "Загрузка нового таймлайна")
+  (handler-bind ((sb-int:simple-file-error #'(lambda (c)
+					       (invoke-restart 'file-error))))
+    (load-timeline)))
+    
+
+(defun if-not-exists ()
+  ;;  Если файла не существует...
+  (init-timeline)
+  (save-timeline *current-timeline*)
+  (show-message "Создан новый пустой таймлайн"))
 	  
 (defun gen-empty ()
   ;; Генерация пустого массива
