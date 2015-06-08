@@ -39,9 +39,6 @@
 (defgeneric serialize-line (timeline)
   (:documentation "Сериализация таймлайна"))
 
-(defgeneric deserialize-line (timeline)
-  (:documentation "Десериализация таймлайна"))
-
 (defgeneric write-tline (timeline)
   (:documentation "Сохранение таймлайна"))
 
@@ -78,7 +75,15 @@
     (push (list current-id (read-input ">")) timeslices)
     (input-operate current-id (interval-input (timeinput)) timeline)
     (incf current-id)))
-  
+
+(defmethod serialize-line ((timeline timeline))
+  ;; Преобразование объекта в lisp-форму
+  (with-slots ((timeline timeline)
+	       (timeslices timeslices)
+	       (current-id current-id)) timeline
+    (list timeline timeslices current-id)))
+
+
 (defmethod extract-task ((timeline timeline)
 			 id)
   ;; Извлечение записи из массива по id
@@ -102,7 +107,15 @@
 (defun init-timeline ()
   ;; Инициализация нового таймлайна
   (setf *current-timeline* (make-instance 'timeline)))
-  
+
+(defun deserialize-line (arr)
+  ;; Преобразование lisp-формы в объект
+  (setf *current-timeline* (make-instance 'timeline
+					  :timeline (first arr)
+					  :timeslices (second arr)
+					  :current-id (third arr))))
+
+	  
 (defun gen-empty ()
   ;; Генерация пустого массива
   (make-array +noe+ :initial-element 0))
