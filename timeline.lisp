@@ -39,12 +39,6 @@
 (defgeneric deserialize-line (timeline)
   (:documentation "Сериализация таймлайна"))
 
-(defgeneric write-tline (timeline)
-  (:documentation "Сохранение таймлайна"))
-
-(defgeneric read-tline (timeline)
-  (:documentation "Загрузка таймлайна"))
-
 (defgeneric clear-line (timeline)
   (:documentation "Удаление несуществующих записей"))
 
@@ -138,7 +132,22 @@
   (show-message "Загрузка нового таймлайна")
   (handler-bind ((sb-int:simple-file-error #'(lambda (c)
 					       (invoke-restart 'file-error))))
-    (load-timeline)))
+    (load-timeline)
+    (show-menu)))
+
+(defun show-menu ()
+  ;; Отображение меню
+  (show-message "Выберите действие:
+1: Отображение таймлайна (по умолчанию)
+2: Добавление записи
+3: удаление записей")
+  (let (ans (parse-integer (read-input ">")))
+    (cond
+      ((= ans 2)
+       (add-line *current-timeline*))
+      (t (view-line *current-timeline* -1)))))
+	
+    
     
 
 (defun if-not-exists ()
