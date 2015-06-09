@@ -42,7 +42,8 @@
 (defgeneric clear-line (timeline)
   (:documentation "Удаление несуществующих записей"))
 
-(defgeneric edit-line (timeline)
+(defgeneric edit-line (timeline
+		       id)
   (:documentation "Редактирование таймлайна"))
 
 (defgeneric view-line (timeline
@@ -93,6 +94,12 @@
        (task-list timeline))
       (t (task-list timeline id)))))
 	       
+(defmethod edit-line ((timeline timeline)
+		      id)
+  ;; Удаление записей из таймлайна
+  (with-accessors ((timeline timeline)) timeline
+    (delete-slice timeline
+		  id)))
 
 
 ;;;
@@ -141,7 +148,7 @@
 1: Отображение таймлайна (по умолчанию)
 2: Добавление записи
 3: удаление записей")
-  (let (ans (parse-integer (read-input ">")))
+  (let ((ans (or (parse-integer (read-input ">") :junk-allowed t) -1)))
     (cond
       ((= ans 2)
        (add-line *current-timeline*))
