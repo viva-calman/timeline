@@ -42,6 +42,10 @@
 (defgeneric clear-line (timeline)
   (:documentation "Удаление несуществующих записей"))
 
+(defgeneric get-slice-id (timeline
+			  id)
+  (:documentation "Возвращает id слайса по id в таймлайне"))
+
 (defgeneric edit-line (timeline
 		       id)
   (:documentation "Редактирование таймлайна"))
@@ -380,11 +384,13 @@
     (show-message "Введите время")
     (push (parse-timeinput (read-input ">")) output)
     (show-message "Введите день недели")
-    (push (do
-	   ((ans (or (parse-integer (read-input "=>") :junk-allowed t) -1)))
-	   ((and (< 0 ans) (> 8 ans)) ans)
-	    (setf ans (or (parse-integer (read-input "=>") :junk-allowed t) -1)))
-	  output)))
+    (push (list
+	   (write-to-string
+	    (do
+	     ((ans (or (parse-integer (read-input "=>") :junk-allowed t) -1)))
+	     ((and (< 0 ans) (> 8 ans)) ans)
+	      (setf ans (or (parse-integer (read-input "=>") :junk-allowed t) -1)))))
+	   output)))
 
 
 (defun get-int-id (tl)
@@ -400,7 +406,11 @@
     
 (defun interval-input (inter)
   ;; Служебная функция, обертка для ввода
-  (return-from interval-input (list (gen-interval-list (first inter) (third inter)) (- (second inter) (third inter)))))
+  (return-from interval-input (list
+			       (gen-interval-list (first inter)
+						  (third inter))
+			       (- (second inter)
+				  (third inter)))))
 
 (defun gen-day-interval (intlist)
   ;; День в интервалы
