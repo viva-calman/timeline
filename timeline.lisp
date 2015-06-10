@@ -152,9 +152,14 @@
     (cond
       ((= ans 2)
        (add-line *current-timeline*))
+      ((= ans 3)
+       (edit-line *current-timeline* (input-id)))
       (t (view-line *current-timeline* -1)))))
 	
-    
+(defun input-id ()
+  ;; Ввод значения для удаления записи
+  (show-message "Введите время и день недели, на которые приходится нужный отрезок")
+  
     
 
 (defun if-not-exists ()
@@ -349,12 +354,6 @@
 	  (second timelist-b)
 	  (third timelist-b))))
 	  
-;(defun extract-task (id)
-;  ;; Заглушка. вывод задачи по id
-;  (if (= id 0)
-;      (setf id "Свободное время"))
-;  (return-from extract-task id))
-
 (defun read-input (prompt)
   ;; Чтение пользовательского ввода
   (format *query-io* "~a: " prompt)
@@ -374,6 +373,23 @@
     (show-message "Укажите дни недели, на которые применяется этот отрезок. Можно указать диапазон, через дефис или последовательно в любой форме и с любым разделителем, кроме дефиса")
     (push (parse-dayofweek (read-input ">")) output)
     (return-from timeinput output)))
+
+(defun get-slice-by-time ()
+  ;; Получение интервала по заданному времени
+  (let ((output))
+    (show-message "Введите время")
+    (push (parse-timeinput (read-input ">")) output)
+    (show-message "Введите день недели")
+    (push (do
+	   ((ans (or (parse-integer (read-input "=>") :junk-allowed t) -1)))
+	   ((and (< 0 ans) (> 8 ans)) ans)
+	    (setf ans (or (parse-integer (read-input "=>") :junk-allowed t) -1)))
+	  output)))
+
+
+(defun get-int-id (tl)
+  ;; получаем номер интервала
+  (gen-interval-list (first tl) (second tl)))
 
 (defun gen-interval-list (days
 			  hours)
