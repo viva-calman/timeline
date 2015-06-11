@@ -75,6 +75,12 @@
     (input-operate current-id (interval-input (timeinput)) timeline)
     (incf current-id)))
 
+(defmethod get-slice-id ((timeline timeline)
+			 id)
+  ;; Возаращет id таймлайна по id  в массиве
+  (with-slots ((timeline timeline)) timeline
+    (elt timeline (first id))))
+
 (defmethod deserialize-line ((timeline timeline))
   ;; Преобразование объекта в lisp-форму
   (with-slots ((timeline timeline)
@@ -369,20 +375,27 @@
   (let ((output))
     (show-message "Введите время начала отрезка, в формате ЧЧ:ММ
 Разделитель может быть любым, минуты округляются автоматически до ближайшего числа, кратного пяти")
-    (push (parse-timeinput (read-input ">")) output)
+    (push (repeat-timeinput) output)
     (show-message "Введите время окончания отрезка" )
     (push (do
-	   ((out (parse-timeinput (read-input ">")) (parse-timeinput (read-input ">"))))
+	   ((out (repeat-timeinput) (repeat-timeinput)))
 	   ((< (first output) out) out)) output)
     (show-message "Укажите дни недели, на которые применяется этот отрезок. Можно указать диапазон, через дефис или последовательно в любой форме и с любым разделителем, кроме дефиса")
     (push (parse-dayofweek (read-input ">")) output)
     (return-from timeinput output)))
 
+(defun repeat-timeinput ()
+  ;; повторный ввод времени, если ввод был произведен неправильно
+  (do
+   ((ans (parse-timeinput (read-input ">"))))
+   ((not (equal ans nil)) ans)
+    (setf ans (parse-timeinput (read-input "=>")))))
+
 (defun get-slice-by-time ()
   ;; Получение интервала по заданному времени
   (let ((output))
     (show-message "Введите время")
-    (push (parse-timeinput (read-input ">")) output)
+    (push (repeat-timeinput) output)
     (show-message "Введите день недели")
     (push (list
 	   (write-to-string
@@ -420,10 +433,12 @@
 
 (defun parse-timeinput (timestring)
   ;; Функция, разбирающая пользовательский ввод времени.
-  (let ((parsed-string (first (cl-ppcre:all-matches-as-strings "\\d{1,2}\\D+\\d{1,2}" timestring))))
+  (let ((parsed-string (first (cl-ppcre:all-matches-as-strings "^\\d{1,2}\\D+\\d{1,2}" timestring))))
     (if (not (eq parsed-string nil))
 	(convert-time (cl-ppcre:all-matches-as-strings "\\d{1,2}" parsed-string))
-	(show-message "Неверный формат времени"))))
+	(progn
+	  (show-message "Неверный формат времени")
+	  (return-from parse-timeinput nil)))))
 
 (defun convert-time (timelist)
   ;; Перевод времени в интервалы
