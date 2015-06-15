@@ -108,9 +108,11 @@
 		      id)
   ;; Удаление записей из таймлайна
   (with-accessors ((timeline timeline)) timeline
-    (delete-slice timeline
-		  id)))
-
+    (if (= id 0)     
+	(delete-slice timeline
+		      id)
+	(show-message "Свободное время, удалять нечего"))))
+  
 
 ;;;
 ;;; Функции
@@ -169,6 +171,13 @@
 (defun input-id ()
   ;; Ввод значения для удаления записи
   (show-message "Введите время и день недели, на которые приходится нужный отрезок")
+  (do
+   ((ans (get-slice-id *current-timeline* (get-int-id (get-slice-by-time)))))
+   ((> ans -1) ans)
+    (setf ans (get-slice-id *current-timeline* (get-int-id (get-slice-by-time))))))
+    
+    
+    
   
     
 
