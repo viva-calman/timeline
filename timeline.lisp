@@ -50,6 +50,9 @@
 		       id)
   (:documentation "Редактирование таймлайна"))
 
+(defgeneric clear-slicelist (timeline)
+  (:documentation "Очистка несуществующих записей"))
+
 (defgeneric view-line (timeline
 		       id)
   (:documentation "Вывод таймлайна"))
@@ -108,11 +111,28 @@
 		      id)
   ;; Удаление записей из таймлайна
   (with-accessors ((timeline timeline)) timeline
-    (if (= id 0)     
+    (if (= id 0)
+	(show-message "Свободное время, удалять нечего")
 	(delete-slice timeline
-		      id)
-	(show-message "Свободное время, удалять нечего"))))
-  
+		      id)))
+  (clear-slicelist timeline))
+	
+(defmethod clear-slicelist ((timeline timeline))
+  ;; Удаление из списка слайсов несуществующих более записей
+  (with-accessors ((timeline timeline)
+		   (timeslices timeslices)) timeline
+    (let ((new-slicelist))
+      (loop for i in timeslices do (let ((result))
+				     (if (delete-not-exists
+					  (delete-duplicate
+					   (loop for j from 0 upto 2015
+					      collect (elt timeline j)))
+					   i)
+					  (push i new-slicelist))))
+      (setf timeslices new-slicelist))))
+    
+		     
+
 
 ;;;
 ;;; Функции
@@ -175,11 +195,6 @@
    ((ans (get-slice-id *current-timeline* (get-int-id (get-slice-by-time)))))
    ((> ans -1) ans)
     (setf ans (get-slice-id *current-timeline* (get-int-id (get-slice-by-time))))))
-    
-    
-    
-  
-    
 
 (defun if-not-exists ()
   ;;  Если файла не существует...
@@ -281,10 +296,6 @@
 			       (check-fill 0
 					   (third diap)
 					   timeline)))))))))))
-	
-	
-
-
 
 ;;;
 ;;; Служебные функции
@@ -474,8 +485,13 @@
       ((cl-ppcre:all-matches-as-strings "\\d{1,7}" workdow)
        (return-from parse-dayofweek (delete-duplicate (cl-ppcre:all-matches-as-strings "\\d" workdow ))))
       (t (return-from parse-dayofweek (list "1" "2" "3" "4" "5" "6" "7"))))))
-    
 
+(defun delete-not-exists (checklist
+			  eltlist)
+  ;; Проверка на существование элемента таймслайсов
+  (let ((sid (first eltlist)))
+    (loop for i in checklist do (if (= i sid)
+				    (return-from delete-not-exists eltlist)))))
 
 (defun delete-duplicate (worklist)
   ;; Удаление повторяющихся элементов из списка
