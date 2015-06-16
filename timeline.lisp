@@ -137,6 +137,7 @@
 ;;;
 ;;; Функции
 ;;;
+
 (defun init-timeline ()
   ;; Инициализация нового таймлайна
   (setf *current-timeline* (make-instance 'timeline)))
@@ -172,7 +173,10 @@
   (handler-bind ((sb-int:simple-file-error #'(lambda (c)
 					       (invoke-restart 'file-error))))
     (load-timeline)
-    (show-menu)))
+    (loop (progn
+	    (show-menu)
+	    (save-timeline *current-timeline*))
+       (if (not (y-or-n-p "Продолжить? [y/n]: ")) (return)))))
 
 (defun show-menu ()
   ;; Отображение меню
